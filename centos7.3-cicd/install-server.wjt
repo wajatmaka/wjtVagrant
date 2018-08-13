@@ -4,7 +4,7 @@ yum install epel-release  iptables-service zip net-tools tcpdump bind-utils unzi
 yum remove firewalld
 
 
-echo "### Instal Jenkins  #####""
+echo "### Instal Jenkins  #####"
 CHECK_JENKINS=`rpm -qa | grep jenkins | wc -l`
 if [ $CHECK_JENKINS -eq 1 ]
 then

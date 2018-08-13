@@ -1,0 +1,60 @@
+# Install Basic
+
+yum install epel-release  iptables-service zip net-tools tcpdump bind-utils unzip curl wget -y
+yum remove firewalld
+
+
+echo "### Instal Jenkins  #####""
+CHECK_JENKINS=`rpm -qa | grep jenkins | wc -l`
+if [ $CHECK_JENKINS -eq 1 ]
+then
+     echo "JENKINS Sudah terinstall sebelumnya"
+else
+     wget -c https://pkg.jenkins.io/redhat/jenkins-2.137-1.1.noarch.rpm
+     rpm -i  jenkins-2.137-1.1.noarch.rpm
+     cat  /var/lib/jenkins/secrets/initialAdminPassword
+     sysetmctl enable jenkins
+fi
+
+
+echo "### Install JDK ####"
+CHECK_JDK=`rpm -qa | grep jdk|grep -v "openjdk"| wc -l`
+if [ $CHECK_JDK -gt  0 ]
+then
+     echo "JDK Sudah terinstall sebelumnya"
+else
+      wget --no-cookies \
+      --no-check-certificate \
+      --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+      "http://download.oracle.com/otn-pub/java/jdk/8-b132/jdk-8-linux-x64.rpm" \
+      -O jdk-8-linux-x64.rpm
+      rpm -Uvh jdk-8-linux-x64.rpm
+      alternatives --install /usr/bin/java java /usr/java/jdk1.8.0/jre/bin/java 20000
+      alternatives --install /usr/bin/jar jar /usr/java/jdk1.8.0/bin/jar 20000
+      alternatives --install /usr/bin/javac javac /usr/java/jdk1.8.0/bin/javac 20000
+      alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.8.0/jre/bin/javaws 20000
+fi
+
+
+echo "### Install Gradle ###"
+if [ -f /opt/gradle/latest ]
+then
+       echo "Gradle Sudah terinstall sebelumnya"
+else
+        gradle_version=3.4.1
+        wget -N https://services.gradle.org/distributions/gradle-${gradle_version}-all.zip
+        mkdir -p /opt/gradle
+        unzip  gradle-${gradle_version}-all.zip -d /opt/gradle
+        ln -sfn gradle-${gradle_version} /opt/gradle/latest
+        printf "export GRADLE_HOME=/opt/gradle/latest\nexport PATH=\$PATH:\$GRADLE_HOME/bin" > /etc/profile.d/gradle.sh
+        source  /etc/profile.d/gradle.sh
+fi
+
+
+# Turn Off SeLinux
+sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+setenforce 0
+sestatus
+
+# Restart
+reboot

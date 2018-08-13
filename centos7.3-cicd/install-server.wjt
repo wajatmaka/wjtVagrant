@@ -76,4 +76,5 @@ setenforce 0
 sestatus
 
 # Restart
+echo "SISTEM DI RESTART"
 reboot

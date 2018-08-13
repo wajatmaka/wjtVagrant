@@ -75,6 +75,11 @@ sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
 setenforce 0
 sestatus
 
+# Turn Off service unused
+systemctl disable postfix postfix rcpbind.socket
+systemctl stop postfix postfix rcpbind.socket
+
+
 # Restart
 echo "SISTEM DI RESTART"
 reboot

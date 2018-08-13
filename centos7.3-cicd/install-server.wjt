@@ -1,6 +1,6 @@
 # Install Basic
 
-yum install epel-release  iptables-service zip net-tools tcpdump bind-utils unzip curl wget -y
+yum install epel-release git iptables-service zip net-tools tcpdump bind-utils unzip curl wget -y
 yum remove firewalld
 
 

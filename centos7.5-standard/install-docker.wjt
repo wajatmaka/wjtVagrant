@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# Install docker script
+#
+
+echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   CHECK DEPEDENCY  \e[0m"
+req1=`rpm -qa | grep yum-utils | wc -l`
+req2=`rpm -qa | grep lvm2-2 | wc -l`
+req3=`rpm -qa | grep device-mapper-persistent-data | wc -l`
+req4=`rpm -qa | grep epel-release | wc -l`
+[ "$req1" -gt 0 ] && echo "yum-utils installed" || yum install -y yum-utils; 
+[ "$req2" -gt 0 ] && echo "lvm2 installed" || yum install -y lvm2; 
+[ "$req3" -gt 0 ] && echo "device-mapper-persistent-data installed" || yum install -y device-mapper-persistent-data; 
+[ "$req4" -gt 0 ] && echo "epel-release installed" || yum install -y epel-release; 
+echo ""
+echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   CHECK REPO  \e[0m"
+if [ -f /etc/yum.repos.d/dockerce.repo ]
+then
+echo "docker repo avaialable"
+else
+cat > /etc/yum.repos.d/dockerce.repo <<EOF
+[docker-ce-stable]
+name=Docker CE Stable 
+baseurl=https://download.docker.com/linux/centos/7/\$basearch/stable
+enabled=1
+gpgcheck=1
+gpgkey=https://download.docker.com/linux/centos/gpg
+EOF
+fi
+echo ""
+echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   UPDATE OS  \e[0m"
+yum update -y
+echo ""
+echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   INSTALL DOCKER  \e[0m"
+req5=`rpm -qa | grep docker-ce | wc -l`
+req6=`rpm -qa | grep docker-compose | wc -l`
+[ "$req5" -gt 0 ] && echo "docker-ce installed" || yum install -y docker-ce; 
+[ "$req6" -gt 0 ] && echo "docker-compose installed" || yum install -y docker-compose; 
+systemctl enable docker
+systemctl start docker
+echo ""
+echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   ADDUSER SENOPS  \e[0m"
+user=`id senops | wc -l`
+if [ $user -eq 1 ]
+then
+echo "sudah ada user senops"
+else
+adduser senops
+passwd senops
+usermod -aG docker senops
+fi
+echo ""
+echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   CREATE DIRECTORY DOCKER  \e[0m"
+if [ -d /docker ]
+then
+echo "directory avaialable"
+else
+mkdir -p /docker
+chown senops:senops /docker
+echo Directory Created
+fi
+echo ""
+echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   DISABLE SELINUX  \e[0m"
+check_selinux=`cat /etc/selinux/config  | grep ^SELINUX | grep disabled|wc -l`
+if [ $check_selinux -eq 1 ]
+then
+  echo "sudah disabled selinux"
+else
+  sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+  setenforce 0
+  sestatus
+fi

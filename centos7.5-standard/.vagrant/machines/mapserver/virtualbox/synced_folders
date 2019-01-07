@@ -1,0 +1,1 @@
+{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"/home/wajatmaka/Activity/GITHUB/wjtVagrant/centos7.5-standard","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}}}
